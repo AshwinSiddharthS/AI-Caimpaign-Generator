@@ -6,6 +6,10 @@ const EnvSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number().int().positive().default(5000),
+  SERVE_CLIENT: z
+    .union([z.boolean(), z.string()])
+    .default(false)
+    .transform((val) => (typeof val === "boolean" ? val : val.toLowerCase() === "true")),
 
   AI_PROVIDER: z.enum(["gemini", "mock"]).default("gemini"),
   GEMINI_API_KEY: z.string().optional(),

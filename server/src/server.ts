@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import { env } from "./config/env.js";
 import { createApiRouter } from "./routes/api.js";
@@ -41,9 +42,17 @@ app.use(helmet());
 const allowedOrigins = env.CLIENT_ORIGIN.split(",").map((o) => o.trim());
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
+    origin: allowedOrigins.includes("*")
+      ? true
+      : (origin, callback) => {
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(null, false);
+          }
+        },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
   })
 );
 
@@ -59,12 +68,25 @@ app.use(globalRateLimiter);
 // API routes
 app.use("/api/v1", createApiRouter(provider));
 
-// Serve built client in production
+// JSON 404 handler for unknown /api/* routes
+app.all(["/api", "/api/*"], (_req, res) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      code: "NOT_FOUND",
+      message: "Route not found",
+    },
+  });
+});
+
+// Serve client static files and SPA catch-all ONLY when SERVE_CLIENT=true and client/dist/index.html exists
 const clientDist = path.resolve(__dirname, "../../client/dist");
-if (env.NODE_ENV === "production") {
+const clientIndexHtml = path.join(clientDist, "index.html");
+
+if (env.SERVE_CLIENT && fs.existsSync(clientIndexHtml)) {
   app.use(express.static(clientDist));
   app.get("*", (_req, res) => {
-    res.sendFile(path.join(clientDist, "index.html"));
+    res.sendFile(clientIndexHtml);
   });
 }
 
