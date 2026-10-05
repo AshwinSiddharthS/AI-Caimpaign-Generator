@@ -1,8 +1,13 @@
+
 # CampaignAI
 
-> **AI-powered ecommerce campaign copy, built for every channel.**
+AI-powered ecommerce campaign copy, built for every channel.
 
-CampaignAI generates ready-to-use marketing copy for Email, WhatsApp, and SMS from a single form — powered by Google Gemini.
+🔗 **Live demo:** https://ai-caimpaign-generator.vercel.app/
+🎥 **Demo video:** https://drive.google.com/file/d/1MfIHsp5oGQ50sBSsbeVwbwKTKBTJhTfm/view?usp=drivesdk
+⚙️ **Backend health check:** https://ai-caimpaign-generator.onrender.com/api/v1/health
+
+> Note: the backend runs on Render's free tier, so the first request after idle can take 30 to 60 seconds to wake up.
 
 ---
 
